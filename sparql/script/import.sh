@@ -6,41 +6,30 @@
 # @2018 Loreto Parisi (loretoparisi at gmail dot com)
 #
 
+# blazegraph install folder
+BLAZEGRAPH_HOME=/root/blazegraph
+
 # wikidata dump volume folder
-ROOT=/root
-# wikidata dump
-WIKIDATA_DUMP_FILE=wikidata-20180319-all-BETA.ttl.gz 
+# it will contain the split folder
+# and the wikidata journal file: wikidata.jnl
+# example: /root/wikidata
+ROOT=/root/data
+
+# blazegraph log file
+LOGS=$ROOT/import.log
 
 #
 # munge the wikidata dump
 # create data files for munge
 # check if data file dir exists already
 #
-if [ ! -d "$ROOT/data/split" ]; then
-  echo Creating data split folder at "$ROOT/data/split"
-  mkdir $ROOT/data/split
-fi
-
-#
-# check wikidata file existance
-#
-if [ ! -f "$ROOT/data/$WIKIDATA_DUMP_FILE" ]; then
-  echo The wikidata file does not exist
+if [ ! -d "$ROOT/split" ]; then
+  echo The split folder has not been found inside "$ROOT", please run split.sh first
   exit
 fi
 
-# 
-# Pre-process the dump with Munger utility:
-# Run in background and append output to nohup
-# This is necessary since the container runs as a deamon
-#
-# The option -l en only imports English labels. 
-# The option -s skips the sitelinks, for smaller storage and better performance. 
-# If you need labels in other languages, 
-# either add them to the list - -l en,de,ru - or skip the language option altogether. 
-# If you need sitelinks, remove the -s option.
-#
-nohup ./munge.sh -f $ROOT/data/$WIKIDATA_DUMP_FILE -d $ROOT/data/split -l en &
+# entering blazegraph root folder
+cd $BLAZEGRAPH_HOME/
 
 #
 # This will load the data files one by one into the Blazegraph data store. 
@@ -49,4 +38,4 @@ nohup ./munge.sh -f $ROOT/data/$WIKIDATA_DUMP_FILE -d $ROOT/data/split -l en &
 # Run in background and append output to nohup
 # This is necessary since the container runs as a deamon
 #
-nohup ./loadRestAPI.sh -n wdq -d $ROOT/data/split &
+nohup ./loadRestAPI.sh -n wdq -d $ROOT/split 2>&1 >> $LOGS &

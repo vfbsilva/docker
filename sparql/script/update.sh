@@ -6,9 +6,20 @@
 # @2018 Loreto Parisi (loretoparisi at gmail dot com)
 #
 
+# blazegraph install folder
+BLAZEGRAPH_HOME=/root/blazegraph
+
 # wikidata dump volume folder
-ROOT=/root
-WIKIDATA=wikidata-20150427-all-BETA.ttl.gz
+# it will contain the split folder
+# and the wikidata journal file: wikidata.jnl
+# example: /root/wikidata
+ROOT=/root/data
+
+# blazegraph log file
+LOGS=$ROOT/update.log
+
+# entering blazegraph root folder
+cd $BLAZEGRAPH_HOME/
 
 #
 # To update the database from Wikidata fresh edits, 
@@ -20,4 +31,4 @@ WIKIDATA=wikidata-20150427-all-BETA.ttl.gz
 # as updater only picks up recently edited items. Use the same set of language/skip 
 # options as in the munge.sh script, e.g. -l en -s.
 #
-./runUpdate.sh -n wdq
+./runUpdate.sh 2>&1 >> $LOGS &

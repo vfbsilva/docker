@@ -9,7 +9,7 @@
 # Copyright (c) 2018 Loreto Parisi - https://github.com/loretoparisi/docker
 #
 
-FROM tensorflow/tensorflow:1.5.0
+FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
 
 MAINTAINER Loreto Parisi loretoparisi@gmail.com
 
@@ -21,22 +21,27 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     wget \
-    vim
+    vim \
+    python-pip python-dev \
+    ipython
 
 # pip
 RUN pip install --upgrade pip
 
-# download pretrained model
+# tensorflow >= 1.3.0 and tensor2tensor >= 1.4.0
+RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
 RUN \
-    wget -q -O g2p-seq2seq-cmudict.tar.gz https://sourceforge.net/projects/cmusphinx/files/G2P%20Models/g2p-seq2seq-cmudict.tar.gz/download && \
-    tar xf g2p-seq2seq-cmudict.tar.gz
+    pip install tensorflow-gpu==1.4.0 && \
+    pip install tensor2tensor==1.5.7
 
 # download CMU Dict
 RUN \
     git clone https://github.com/cmusphinx/cmudict
 
+# install g2p-seq2seq.git
+RUN git clone https://github.com/cmusphinx/g2p-seq2seq
+COPY src/setup.py g2p-seq2seq/setup.py
 RUN \
-    git clone https://github.com/cmusphinx/g2p-seq2seq.git && \
     cd g2p-seq2seq/ && \
     python setup.py install && \
     cd -
